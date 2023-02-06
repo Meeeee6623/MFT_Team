@@ -21,10 +21,10 @@ class Game:
         self.price_history = price_history
 
     def run_game(self, delay_list, simple=True, n_stocks=4):
-        stock_list = [f"Stock{s}" for s in range(1, n_stocks+1)]
+        stock_list = [f"Stock{s}" for s in range(1, n_stocks + 1)]
         position_dict = {stock: [] for stock in stock_list}
         bought_data_list = [
-            stock+"_Delay" if stock in delay_list else stock for stock in stock_list]
+            stock + "_Delay" if stock in delay_list else stock for stock in stock_list]
         price_history_bought = self.price_history.loc[:, bought_data_list]
 
         for idx, row in price_history_bought.iterrows():
@@ -33,12 +33,15 @@ class Game:
             for stock in stock_list:
                 allowed_notional = min(
                     MAX_NOTIONAL_TOTAL - net_notional, MAX_NOTIONAL_STOCK)
-                curr_price = row[stock]
-                allowed_size = floor(allowed_notional/curr_price)
+                if stock in delay_list:
+                    curr_price = row[stock + "_Delay"]
+                else:
+                    curr_price = row[stock]
+                allowed_size = floor(allowed_notional / curr_price)
                 intended_size = trades[stock] if stock in trades else 0
                 allowed_pos = min(
                     max(intended_size, -allowed_size), allowed_size)
-                net_notional += allowed_pos*curr_price
+                net_notional += allowed_pos * curr_price
                 position_dict[stock].append(allowed_pos)
 
         price_history = self.price_history.loc[:, stock_list]
@@ -51,7 +54,7 @@ class Game:
             df_position, left_index=True, right_index=True, suffixes=("", "_Positions"))
         df_position["Pnl"] = 0
         for stock in stock_list:
-            df_position[stock+"_Pnl"] = (df_position[stock+"_Next"] -
-                                         df_position[stock]) * df_position[stock+"_Positions"]
+            df_position[stock + "_Pnl"] = (df_position[stock + "_Next"] -
+                                           df_position[stock]) * df_position[stock + "_Positions"]
             df_position["Pnl"] += df_position[stock + "_Pnl"]
         return SimulationResults(pnl=df_position["Pnl"].sum(), history=df_position)
