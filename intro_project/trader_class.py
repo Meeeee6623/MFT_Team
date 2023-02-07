@@ -6,7 +6,9 @@ class Trader:
         # Add any additional info you want
         self.prices = pd.DataFrame({f"Stock{s}": [] for s in range(1, n_stocks + 1)})
         # Add returns columns
-        self.prices = self.prices.append({f"Stock{s}_Returns": [] for s in range(1, n_stocks + 1)}, ignore_index=True)
+        self.prices = self.prices.append(
+            {f"Stock{s}_Returns": [] for s in range(1, n_stocks + 1)}, ignore_index=True
+        )
         # Add timestep column
         self.prices = self.prices.append({"Time": []}, ignore_index=True)
 
@@ -23,29 +25,41 @@ class Trader:
                 Positive is buy/long and negative is sell/short.
         """
         trades = {}
+
+
         return trades
 
 
 class BullishTrader(Trader):
     def MakeTrades(self, time, stock_prices):
-        return {"Stock1": 1000000, "Stock2": 1000000, "Stock3": 1000000, "Stock4": 1000000}
+        return {
+            "Stock1": 1000000,
+            "Stock2": 1000000,
+            "Stock3": 1000000,
+            "Stock4": 1000000,
+        }
 
 
 class BearishTrader(Trader):
     def MakeTrades(self, time, stock_prices):
-        return {"Stock1": -1000000, "Stock2": -1000000, "Stock3": -1000000, "Stock4": -1000000}
+        return {
+            "Stock1": -1000000,
+            "Stock2": -1000000,
+            "Stock3": -1000000,
+            "Stock4": -1000000,
+        }
 
 
 class SampleTrader(Trader):
     def MakeTrades(self, time, stock_prices):
         trades = {}
         # TODO: PICK HOW TO MAKE TRADES.
-        trades['Stock1'] = 1000
-        if 'Stock2' in stock_prices:
-            if stock_prices['Stock2'] > 123:
-                trades['Stock2'] = 1000
+        trades["Stock1"] = 1000
+        if "Stock2" in stock_prices:
+            if stock_prices["Stock2"] > 123:
+                trades["Stock2"] = 1000
             else:
-                trades['Stock2'] = -1000
+                trades["Stock2"] = -1000
         return trades
 
 
