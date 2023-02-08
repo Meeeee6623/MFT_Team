@@ -19,6 +19,12 @@ class Game:
     def __init__(self, trader: Type[Trader], price_history) -> None:
         self.trader = trader
         self.price_history = price_history
+        self.transaction_cost = {
+            "Stock1": 0.0005,
+            "Stock2": 0.0010,
+            "Stock3": 0.0015,
+            "Stock4": 0.0020
+        }
 
     def run_game(self, delay_list, simple=True, n_stocks=4):
         stock_list = [f"Stock{s}" for s in range(1, n_stocks + 1)]
@@ -55,6 +61,8 @@ class Game:
         df_position["Pnl"] = 0
         for stock in stock_list:
             df_position[stock + "_Pnl"] = (df_position[stock + "_Next"] -
-                                           df_position[stock]) * df_position[stock + "_Positions"]
+                                           df_position[stock]) * df_position[stock + "_Positions"] - \
+                                          abs(df_position[stock] * df_position[stock + "_Positions"]) * \
+                                          self.transaction_cost[stock]
             df_position["Pnl"] += df_position[stock + "_Pnl"]
         return SimulationResults(pnl=df_position["Pnl"].sum(), history=df_position)
