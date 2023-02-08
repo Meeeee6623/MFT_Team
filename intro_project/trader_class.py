@@ -6,12 +6,12 @@ class Trader:
         # Add any additional info you want
         self.prices = pd.DataFrame({f"Stock{s}": [] for s in range(1, n_stocks + 1)})
         # Add returns columns
-        self.prices = self.prices.append(
-            {f"Stock{s}_Returns": [] for s in range(1, n_stocks + 1)}, ignore_index=True
-        )
+        self.prices = self.prices.append({f"Stock{s}_Returns": [] for s in range(1, n_stocks + 1)}, ignore_index=True)
         # Add timestep column
         self.prices = self.prices.append({"Time": []}, ignore_index=True)
 
+        self.t_wrong = 0
+        self.o_wrong = 0
         self.n_stocks = n_stocks
 
     def MakeTrades(self, time, stock_prices):
@@ -25,41 +25,29 @@ class Trader:
                 Positive is buy/long and negative is sell/short.
         """
         trades = {}
-
-
         return trades
 
 
 class BullishTrader(Trader):
     def MakeTrades(self, time, stock_prices):
-        return {
-            "Stock1": 1000000,
-            "Stock2": 1000000,
-            "Stock3": 1000000,
-            "Stock4": 1000000,
-        }
+        return {"Stock1": 1000000, "Stock2": 1000000, "Stock3": 1000000, "Stock4": 1000000}
 
 
 class BearishTrader(Trader):
     def MakeTrades(self, time, stock_prices):
-        return {
-            "Stock1": -1000000,
-            "Stock2": -1000000,
-            "Stock3": -1000000,
-            "Stock4": -1000000,
-        }
+        return {"Stock1": -1000000, "Stock2": -1000000, "Stock3": -1000000, "Stock4": -1000000}
 
 
 class SampleTrader(Trader):
     def MakeTrades(self, time, stock_prices):
         trades = {}
         # TODO: PICK HOW TO MAKE TRADES.
-        trades["Stock1"] = 1000
-        if "Stock2" in stock_prices:
-            if stock_prices["Stock2"] > 123:
-                trades["Stock2"] = 1000
+        trades['Stock1'] = 1000
+        if 'Stock2' in stock_prices:
+            if stock_prices['Stock2'] > 123:
+                trades['Stock2'] = 1000
             else:
-                trades["Stock2"] = -1000
+                trades['Stock2'] = -1000
         return trades
 
 
@@ -74,16 +62,37 @@ class MyTrader(Trader):
         for i in range(1, self.n_stocks + 1):
             self.prices[f"Stock{i}_Returns"] = self.prices[f"Stock{i}"].pct_change()
 
-        trades = {}
+        # print if last trade was profitable or not, log if in threshold
         if time > 0:
-            print(f"Stock3 returns: {self.prices['Stock3_Returns'].iloc[-1]}")
-            # when stock3 returns are positive, buy stock4
-            if self.prices["Stock3_Returns"].iloc[-1] > 0:
-                # scale proportionally to stock3 returns
-                trades["Stock4"] = 100000 * self.prices["Stock3_Returns"].iloc[-1] // 1
-                print(f"Buying stock4 at time {time} with {trades['Stock4']} shares")
-            elif self.prices["Stock3_Returns"].iloc[-1] < 0:
-                # scale proportionally to stock3 returns
-                trades["Stock4"] = -100000 * self.prices["Stock3_Returns"].iloc[-1] // 1
-                print(f"Selling stock4 at time {time} with {trades['Stock4']} shares")
+            if self.prices["Stock4_Returns"].iloc[-1] > 0 and self.prices["Stock3_Returns"].iloc[-2] > 0:
+                print("Last trade was profitable")
+            elif self.prices["Stock4_Returns"].iloc[-1] < 0 and self.prices["Stock3_Returns"].iloc[-2] < 0:
+                print("Last trade was profitable")
+            else:
+                print("Last trade was not profitable")
+
+
+        trades = {}
+        if time > 1:
+            # when stock3 returns are positive, buy stock4 scale proportionally to stock3 returns
+            #  threshold: with stock3 returns above threshold, stock 4 returns are VERY likely to be positive
+            # if over threshold, max bet
+            if self.prices["Stock3_Returns"].iloc[-1] > self.threshold:
+                trades['Stock4'] = 600000 // stock_prices["Stock4"] + 1
+            elif self.prices["Stock3_Returns"].iloc[-1] < -self.threshold:
+                trades['Stock4'] = 600000 // -stock_prices["Stock4"] + 1
+            else:
+                # scale proportionally to stock3 if profit not slightly less likely
+                trades["Stock4"] = 500000 / self.threshold * self.prices["Stock3_Returns"].iloc[-1] // stock_prices["Stock4"] + 1
+
+            print(f"Buying stock4 at time {time} with {trades['Stock4']} shares")
         return trades
+
+
+class DumbTrader(Trader):
+    def MakeTrades(self, time, stock_prices):
+        trades = {}
+        trades['Stock4'] = 1
+        return trades
+
+# %%
