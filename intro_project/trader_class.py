@@ -74,16 +74,11 @@ class MyTrader(Trader):
 
         trades = {}
         if time > 1:
-            # when stock3 returns are positive, buy stock4 scale proportionally to stock3 returns
-            #  threshold: with stock3 returns above threshold, stock 4 returns are VERY likely to be positive
-            # if over threshold, max bet
-            if self.prices["Stock3_Returns"].iloc[-1] > self.threshold:
-                trades['Stock4'] = 600000 // stock_prices["Stock4"] + 1
-            elif self.prices["Stock3_Returns"].iloc[-1] < -self.threshold:
-                trades['Stock4'] = 600000 // -stock_prices["Stock4"] + 1
+            # buy stock4 based on sign of stock3 returns
+            if self.prices["Stock3_Returns"].iloc[-1] > 0:
+                trades["Stock4"] = 600000 // stock_prices["Stock4"] + 1
             else:
-                # scale proportionally to stock3 if profit not slightly less likely
-                trades["Stock4"] = 500000 / self.threshold * self.prices["Stock3_Returns"].iloc[-1] // stock_prices["Stock4"] + 1
+                trades["Stock4"] = -600000 // stock_prices["Stock4"] - 1
 
             print(f"Buying stock4 at time {time} with {trades['Stock4']} shares")
         return trades
