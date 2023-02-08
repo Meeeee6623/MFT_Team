@@ -1,5 +1,5 @@
 import pandas as pd
-from trader_class import Trader, SampleTrader
+from RegressionTrader import Trader
 from enum import Enum, auto
 from typing import Type
 from attr import dataclass
